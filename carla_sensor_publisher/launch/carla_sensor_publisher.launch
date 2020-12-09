@@ -1,0 +1,4 @@
+<launch>
+  <node name="carla_sensor_publisher_node" pkg="carla_sensor_publisher" type="carla_sensor_publisher_node" output="screen">
+  </node>
+</launch>
