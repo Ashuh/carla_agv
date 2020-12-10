@@ -45,12 +45,12 @@ class CarlaSensorPublisher {
 CarlaSensorPublisher::CarlaSensorPublisher() {
   ros::NodeHandle private_nh("~");
 
-  private_nh.param("sensor_definition_file", sensor_definition_file, std::string("/home/ashuh/carla_ws/src/carla_agv/config/sensors.json"));
+  ROS_ASSERT(private_nh.getParam("sensor_definition_file", sensor_definition_file));
+  private_nh.param("sensor_ns", sensor_ns, std::string("sensors/"));
   private_nh.param("odom_src_topic", odom_src_topic, std::string("/carla/ego_vehicle/odometry"));
   private_nh.param("odom_out_topic", odom_out_topic, std::string("/odometry"));
   private_nh.param("odom_output_frame", odom_output_frame, std::string("odom"));
   private_nh.param("odom_output_child_frame", odom_output_child_frame, std::string("base_link"));
-  private_nh.param("sensor_ns", sensor_ns, std::string("sensors/"));
 
   parseSensorDefinition();
 
