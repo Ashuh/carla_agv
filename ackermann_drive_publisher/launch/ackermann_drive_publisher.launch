@@ -1,0 +1,10 @@
+<launch>
+
+  <arg name="publish_rate" default="10" />
+  <arg name="out_topic" default="/carla/ego_vehicle/ackermann_cmd" />
+
+  <node name="ackermann_drive_publisher_node" pkg="ackermann_drive_publisher" type="ackermann_drive_publisher_node" output="screen">
+    <param name="publish_rate" value="$(arg publish_rate)"/>
+    <param name="out_topic" value="$(arg out_topic)/"/>
+  </node>
+</launch>
