@@ -77,8 +77,9 @@ void CarlaSensorPublisher::initPubSub(std::string in_topic, std::string out_topi
 
 void CarlaSensorPublisher::odomCallback(const nav_msgs::Odometry in_odom_msg) {
   nav_msgs::Odometry out_odom_msg;
-  out_odom_msg.header = in_odom_msg.header;
-  out_odom_msg.twist.twist.linear.x = in_odom_msg.twist.twist.linear.x;
+  out_odom_msg = in_odom_msg;
+  // out_odom_msg.header = in_odom_msg.header;
+  // out_odom_msg.twist.twist.linear.x = in_odom_msg.twist.twist.linear.x;
   out_odom_msg.header.frame_id = odom_output_frame;
   out_odom_msg.child_frame_id = odom_output_child_frame;
 

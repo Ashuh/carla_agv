@@ -3,7 +3,6 @@
   <arg name="sensor_definition_file" default="$(find agv)/config/sensors.json" />
   <arg name="sensor_ns" default="sensors" />
 
-
   <node name="carla_sensor_publisher_node" pkg="carla_sensor_publisher" type="carla_sensor_publisher_node" output="screen">
     <param name="sensor_definition_file" value="$(arg sensor_definition_file)"/>
     <param name="sensor_ns" value="$(arg sensor_ns)/"/>
