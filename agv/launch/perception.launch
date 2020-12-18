@@ -1,0 +1,100 @@
+<launch>
+  <!-- ray_ground_filter -->
+  <include file="$(find points_preprocessor)/launch/ray_ground_filter.launch">
+    <arg name="input_point_topic" value="/sensors/lidar/lidar1/point_cloud" />  <!-- input_point_topic, ground filtering will be performed over the pointcloud in this topic. -->
+    <arg name="base_frame" value="base_link" />  <!-- Coordinate system to perform transform (default base_link) -->
+    <arg name="clipping_height" value="2.0" />  <!-- Remove Points above this height value (default 2.0 meters) (relative to base_link) -->
+    <arg name="min_point_distance" value="1.85" />  <!-- Removes Points closer than this distance from the sensor origin (default 1.85 meters) -->
+    <arg name="radial_divider_angle" value="0.08" />  <!-- Angle of each Radial division on the XY Plane (default 0.08 degrees)-->
+    <arg name="concentric_divider_distance" value="0.0" />  <!-- Distance of each concentric division on the XY Plane (default 0.0 meters) -->
+    <arg name="local_max_slope" value="8" />  <!-- Max Slope of the ground between Points (default 8 degrees) -->
+    <arg name="general_max_slope" value="5" />  <!-- Max Slope of the ground in the entire PointCloud, used when reclassification occurs (default 5 degrees)-->
+    <arg name="min_height_threshold" value="0.5" />  <!-- Minimum height threshold between points (default 0.05 meters)-->
+    <arg name="reclass_distance_threshold" value="0.2" />  <!-- Distance between points at which re classification will occur (default 0.2 meters)-->
+    <arg name="no_ground_point_topic" value="points_no_ground" />
+    <arg name="ground_point_topic" value="points_ground" />
+  </include>
+
+  <!-- lidar_euclidean_cluster_detect -->
+  <include file="$(find lidar_euclidean_cluster_detect)/launch/lidar_euclidean_cluster_detect.launch">
+    <arg name="points_node" value="/points_no_ground" /><!--CHANGE THIS TO READ WHETHER FROM VSCAN OR POINTS_RAW -->
+    <arg name="remove_ground" value="false" />
+     <arg name="downsample_cloud" value="false" /> <!-- Apply VoxelGrid Filter with the value given by "leaf_size"-->
+    <arg name="leaf_size" value="0.1" /><!-- Voxel Grid Filter leaf size-->
+    <arg name="cluster_size_min" value="20" /><!-- Minimum number of points to consider a cluster as valid-->
+    <arg name="cluster_size_max" value="100000" /><!-- Maximum number of points to allow inside a cluster-->
+    <arg name="sync" value="false" />
+    <arg name="use_diffnormals" value="false" />
+    <arg name="pose_estimation" value="true" />
+     <arg name="clip_min_height" value="-1.0" />
+     <arg name="clip_max_height" value="3.0" />
+
+    <arg name="keep_lanes" value="false" />
+    <arg name="keep_lane_left_distance" value="5" />
+    <arg name="keep_lane_right_distance" value="5" />
+    <arg name="cluster_merge_threshold" value="1.5" />
+    <arg name="clustering_distance" value="0.75" />
+
+    <arg name="use_vector_map" value="false" />
+    <arg name="wayarea_gridmap_layer" value="wayarea" />
+
+    <arg name="output_frame" value="lidar1" />
+
+    <arg name="remove_points_upto" value="0.0" />
+
+    <arg name="use_gpu" value="false" />
+
+    <arg name="use_multiple_thres" value="true"/>
+    <arg name="clustering_ranges" value="[15,30,45,60]"/><!-- Distances to segment pointcloud -->
+    <arg name="clustering_distances"
+        default="[0.5,1.1,1.6,2.1,2.6]"/><!-- Euclidean Clustering threshold distance for each segment -->
+  </include>
+
+  <!-- range_vision_fusion
+  <include file="$(find range_vision_fusion)/launch/range_vision_fusion.launch">  
+    <arg name="detected_objects_range" value="/detection/lidar_detector/objects"/>
+    <arg name="detected_objects_vision" value="/detection/image_detector/objects"/>
+    <arg name="camera_info_src" value="/zed/zed_node/depth/camera_info"/>
+    <arg name="min_car_dimensions" value="[3,2,2]"/>
+    <arg name="min_person_dimensions" value="[1,2,1]"/>
+    <arg name="min_truck_dimensions" value="[4,2,2]"/>
+    <arg name="sync_topics" value="false"/>
+    <arg name="overlap_threshold" value="0.6"/>
+    <arg name="use_vector_map" value="false"/>
+    <arg name="namespace" value="/detection/fusion_tools"/>
+  </include> -->
+
+  <!-- lidar_imm_ukf_pda_track -->
+  <!-- <include file="$(find imm_ukf_pda_track)/launch/imm_ukf_pda_track.launch">
+    <arg name="gating_thres" value="9.22" />
+    <arg name="gate_probability" value="0.99" />
+    <arg name="detection_probability" value="0.9" />
+    <arg name="life_time_thres" value="8" />
+    <arg name="static_velocity_thres" value="0.5" />
+    <arg name="static_num_history_thres" value="3" />
+    <arg name="prevent_explosion_thres" value="1000" />
+    <arg name="lane_direction_chi_thres" value="2.71" />
+    <arg name="nearest_lane_distance_thres" value="1.0" />
+    <arg name="tracker_input_topic" value="/collision_checker/objects" />
+    <arg name="tracker_output_topic" value="/detection/object_tracker/objects" />
+    <arg name="use_sukf" value="false" />
+    <arg name="use_vectormap" value="false" />
+
+    <arg name="tracking_frame" value="/map" />
+    <arg name="lane_frame" value="/map" />
+
+    <arg name="merge_distance_threshold" value="0.5"/>
+
+    <arg name="namespace" value="/detection/object_tracker/"/>
+  </include> -->
+
+  <!-- naive_motion_predict -->
+  <!-- <include file="$(find naive_motion_predict)/launch/naive_motion_predict.launch">
+    <arg name="interval_sec" value="0.1"/>
+    <arg name="num_prediction" value="10"/>
+    <arg name="sensor_height" value="2.0"/>
+    <arg name="filter_out_close_object_threshold" value="1.5"/>
+    <arg name="input_topic" value="/detection/object_tracker/objects"/>
+  </include> -->
+
+</launch>
