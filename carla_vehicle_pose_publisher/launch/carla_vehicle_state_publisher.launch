@@ -1,0 +1,11 @@
+<launch>
+  <arg name="odom_topic" default="/odometry/filtered" />
+  <arg name="vehicle_pose_topic" default="/current_pose" />
+  <arg name="cog_to_rear_dist" default="-2.0" />
+
+  <node name="carla_vehicle_state_publisher_node" pkg="carla_vehicle_state_publisher" type="carla_vehicle_state_publisher_node" output="screen">
+    <param name="odom_topic" value="$(arg odom_topic)"/>
+    <param name="vehicle_pose_topic" value="$(arg vehicle_pose_topic)/"/>
+    <param name="cog_to_rear_dist" value="$(arg cog_to_rear_dist)"/>
+  </node>
+</launch>
