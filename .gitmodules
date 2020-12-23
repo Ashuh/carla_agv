@@ -1,0 +1,3 @@
+[submodule "agv/autoware-contents"]
+	path = agv/autoware-contents
+	url = https://bitbucket.org/carla-simulator/autoware-contents.git
