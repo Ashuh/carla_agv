@@ -1,4 +1,3 @@
-
 #include <carla_msgs/CarlaEgoVehicleStatus.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -32,13 +31,14 @@ class CarlaVehicleStatePublisher {
   ros::Publisher steering_angle_pub;
 
   std::string odom_topic;
-  std::string carla_vehicle_info_topic;
+  std::string carla_vehicle_status_topic;
 
   std::string vehicle_pose_topic;
   std::string velocity_topic;
   std::string steering_angle_topic;
 
   double cog_to_rear_dist;
+  double max_steering_angle;
 
   void odomCallback(const nav_msgs::Odometry in_odom_msg);
   void vehicleStatusCallback(const carla_msgs::CarlaEgoVehicleStatus vehicle_status_msg);
@@ -49,16 +49,17 @@ CarlaVehicleStatePublisher::CarlaVehicleStatePublisher() : tf_listener(tf_buffer
   ros::NodeHandle private_nh("~");
 
   private_nh.param("odom_topic", odom_topic, std::string("/odometry/filtered"));
-  private_nh.param("carla_vehicle_info_topic", carla_vehicle_info_topic, std::string("/carla/ego_vehicle/vehicle_status"));
+  private_nh.param("carla_vehicle_status_topic", carla_vehicle_status_topic, std::string("/carla/ego_vehicle/vehicle_status"));
 
   private_nh.param("vehicle_pose_topic", vehicle_pose_topic, std::string("/current_pose"));
   private_nh.param("velocity_topic", velocity_topic, std::string("/current_velocity"));
   private_nh.param("steering_angle_topic", steering_angle_topic, std::string("/current_steering_angle"));
 
   ROS_ASSERT(private_nh.getParam("cog_to_rear_dist", cog_to_rear_dist));
+  ROS_ASSERT(private_nh.getParam("max_steering_angle", max_steering_angle));
 
   odom_sub = nh.subscribe(odom_topic, 1, &CarlaVehicleStatePublisher::odomCallback, this);
-  carla_vehicle_status_sub = nh.subscribe(carla_vehicle_info_topic, 1, &CarlaVehicleStatePublisher::vehicleStatusCallback, this);
+  carla_vehicle_status_sub = nh.subscribe(carla_vehicle_status_topic, 1, &CarlaVehicleStatePublisher::vehicleStatusCallback, this);
 
   pose_pub = nh.advertise<geometry_msgs::PoseStamped>(vehicle_pose_topic, 1);
   velocity_pub = nh.advertise<geometry_msgs::TwistStamped>(velocity_topic, 1);
@@ -107,7 +108,7 @@ void CarlaVehicleStatePublisher::odomCallback(const nav_msgs::Odometry in_odom_m
 
 void CarlaVehicleStatePublisher::vehicleStatusCallback(const carla_msgs::CarlaEgoVehicleStatus vehicle_status_msg) {
   std_msgs::Float32 steering_angle_msg;
-  steering_angle_msg.data = vehicle_status_msg.control.steer;
+  steering_angle_msg.data = -vehicle_status_msg.control.steer * max_steering_angle;
 
   steering_angle_pub.publish(steering_angle_msg);
 }
