@@ -1,10 +1,15 @@
 <launch>
-
   <arg name="sensor_definition_file" default="$(find agv)/config/sensors.json" />
   <arg name="sensor_ns" default="sensors" />
+  <arg name="base_link_to_cog_x" default="1.65" />
+  <arg name="base_link_to_cog_y" default="0.0" />
+  <arg name="base_link_to_cog_z" default="0.3" />
 
   <node name="carla_sensor_publisher_node" pkg="carla_sensor_publisher" type="carla_sensor_publisher_node" output="screen">
     <param name="sensor_definition_file" value="$(arg sensor_definition_file)"/>
     <param name="sensor_ns" value="$(arg sensor_ns)/"/>
+    <param name="base_link_to_cog_x" value="$(arg base_link_to_cog_x)"/>
+    <param name="base_link_to_cog_y" value="$(arg base_link_to_cog_y)"/>
+    <param name="base_link_to_cog_z" value="$(arg base_link_to_cog_z)"/>
   </node>
 </launch>

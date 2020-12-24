@@ -1,4 +1,3 @@
-
 #include <geometry_msgs/TransformStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
@@ -29,7 +28,7 @@ class CarlaSensorPublisher {
   std::string sensor_ns;
   std::string sensor_definition_file;
 
-  std::vector<std::pair<std::string, geometry_msgs::Transform>> sensor_id_pose_pairs;
+  std::vector<std::pair<std::string, geometry_msgs::Transform>> sensor_id_transform_pairs;
 
   ros::Subscriber odom_sub;
   ros::Publisher odom_pub;
@@ -38,6 +37,10 @@ class CarlaSensorPublisher {
   std::string odom_out_topic;
   std::string odom_output_frame;
   std::string odom_output_child_frame;
+
+  double base_link_to_cog_x;
+  double base_link_to_cog_y;
+  double base_link_to_cog_z;
 
   void odomCallback(const nav_msgs::Odometry in_odom_msg);
 
@@ -56,6 +59,11 @@ CarlaSensorPublisher::CarlaSensorPublisher() {
   ros::NodeHandle private_nh("~");
 
   ROS_ASSERT(private_nh.getParam("sensor_definition_file", sensor_definition_file));
+
+  private_nh.param("base_link_to_cog_x", base_link_to_cog_x, 0.0);
+  private_nh.param("base_link_to_cog_y", base_link_to_cog_y, 0.0);
+  private_nh.param("base_link_to_cog_z", base_link_to_cog_z, 0.0);
+
   private_nh.param("sensor_ns", sensor_ns, std::string("sensors/"));
   private_nh.param("odom_src_topic", odom_src_topic, std::string("/carla/ego_vehicle/odometry"));
   private_nh.param("odom_out_topic", odom_out_topic, std::string("odometry"));
@@ -145,7 +153,7 @@ void CarlaSensorPublisher::parseSensorDefinition() {
       sensor_transform.rotation.z = q.z();
       sensor_transform.rotation.w = q.w();
 
-      sensor_id_pose_pairs.push_back(std::pair<std::string, geometry_msgs::Transform>(sensor_id, sensor_transform));
+      sensor_id_transform_pairs.push_back(std::pair<std::string, geometry_msgs::Transform>(sensor_id, sensor_transform));
     }
   }
 
@@ -156,17 +164,33 @@ void CarlaSensorPublisher::parseSensorDefinition() {
 void CarlaSensorPublisher::publishTransforms() {
   std::vector<geometry_msgs::TransformStamped> transforms;
 
-  for (auto pair : sensor_id_pose_pairs) {
+  geometry_msgs::TransformStamped tf_base_link_to_cog;
+  tf_base_link_to_cog.header.stamp = ros::Time::now();
+  tf_base_link_to_cog.header.frame_id = "base_link";
+  tf_base_link_to_cog.child_frame_id = "cog";
+  tf_base_link_to_cog.transform.translation.x = base_link_to_cog_x;
+  tf_base_link_to_cog.transform.translation.y = base_link_to_cog_y;
+  tf_base_link_to_cog.transform.translation.z = base_link_to_cog_z;
+  tf_base_link_to_cog.transform.rotation.x = 0;
+  tf_base_link_to_cog.transform.rotation.y = 0;
+  tf_base_link_to_cog.transform.rotation.z = 0;
+  tf_base_link_to_cog.transform.rotation.w = 1;
+
+  transforms.push_back(tf_base_link_to_cog);
+
+  for (auto pair : sensor_id_transform_pairs) {
     geometry_msgs::TransformStamped transformStamped;
 
     transformStamped.header.stamp = ros::Time::now();
-    transformStamped.header.frame_id = "base_link";
+    transformStamped.header.frame_id = "cog";
     transformStamped.child_frame_id = pair.first;
     transformStamped.transform = pair.second;
 
     transforms.push_back(transformStamped);
+  }
 
-    ROS_INFO_STREAM("Publishing Transform: base_link -> " << pair.first);
+  for (auto transform : transforms) {
+    ROS_INFO_STREAM("Publishing transform: " << transform.header.frame_id << " -> " << transform.child_frame_id);
   }
 
   br.sendTransform(transforms);
