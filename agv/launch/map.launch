@@ -3,11 +3,11 @@
   <include file="$(find map_file)/launch/points_map_loader.launch">
     <arg name="scene_num" value="noupdate" />
     <arg name="path_area_list" value='""' />
-    <arg name="path_pcd" value='"$(find agv)/point_cloud_maps/Town02.pcd"' />
+    <arg name="path_pcd" value='"$(find agv)/autoware-contents/maps/point_cloud_maps/Town02.pcd"' />
   </include>
 
   <!-- lanelet2_map_loader-->
   <include file="$(find map_file)/launch/lanelet2_map_loader.launch">
-    <arg name="file_name" value="$(find agv)/vector_maps/lanelet2/Town02.osm" />
+    <arg name="file_name" value="$(find agv)/autoware-contents/maps/vector_maps/lanelet2/Town02.osm" />
   </include>
 </launch>
