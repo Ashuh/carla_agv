@@ -1,0 +1,69 @@
+<launch>
+  <!-- Global Planner -->
+  <include file="$(find ll2_global_planner)/launch/ll2_global_planner_node.launch">
+  </include>
+
+  <!-- local planner -->
+  <!-- Trajectory Generation Specific Parameters -->
+  <arg name="samplingTipMargin"     default="4"  /> 
+  <arg name="samplingOutMargin"     default="16" /> 
+  <arg name="samplingSpeedFactor"   default="0.25" />    
+  <arg name="enableHeadingSmoothing"   default="false" />
+      
+  <node pkg="op_local_planner" type="op_trajectory_generator" name="op_trajectory_generator" output="screen">
+    <param name="samplingTipMargin"     value="$(arg samplingTipMargin)"  /> 
+    <param name="samplingOutMargin"     value="$(arg samplingOutMargin)" /> 
+    <param name="samplingSpeedFactor"     value="$(arg samplingSpeedFactor)" />    
+    <param name="enableHeadingSmoothing"   value="$(arg enableHeadingSmoothing)" />
+
+    <remap from="current_pose" to="ndt_pose" />
+  </node>         
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="hack" args="0 0 0 0 0 0 world map" />
+
+  <!-- costmap_generator -->
+  <include file="$(find costmap_generator)/launch/costmap_generator.launch">
+    <arg name="lidar_frame" value="lidar1" />
+    <arg name="map_frame" value="map" />
+    <arg name="grid_min_value" value="0.0" />
+    <arg name="grid_max_value" value="1.0" />
+    <arg name="grid_resolution" value="0.2" />
+    <arg name="grid_length_x" value="50" />
+    <arg name="grid_length_y" value="30" />
+    <arg name="grid_position_x" value="20" />
+    <arg name="grid_position_y" value="0" />
+    <arg name="maximum_lidar_height_thres" value="0.3" />
+    <arg name="minimum_lidar_height_thres" value="-2.2" />
+    <arg name="expand_polygon_size" value="1.0" />
+    <arg name="size_of_expansion_kernel" value="9" />
+    <arg name="use_objects_box" value="false" />
+    <arg name="use_objects_convex_hull" value="true" />
+    <arg name="use_points" value="true" />
+    <arg name="use_wayarea" value="false" />
+
+    <arg name="objects_input" value="/detection/lidar_detector/objects" />
+    <arg name="points_input" value="/points_no_ground" />
+  </include>
+
+  <!-- waypoint_replanner + waypoint_marker_publisher + waypoint_loader (disabled)-->
+  <include file="$(find waypoint_maker)/launch/waypoint_loader.launch">
+    <arg name="load_csv" value="false" />
+    <arg name="multi_lane_csv" value="$(find agv)/saved_waypoints.csv" />
+    <arg name="replanning_mode" value="False" />
+    <arg name="realtime_tuning_mode" value="False" />
+    <arg name="resample_mode" value="True" />
+    <arg name="resample_interval" value="1.0" />
+    <arg name="replan_curve_mode" value="False" />
+    <arg name="replan_endpoint_mode" value="True" />
+    <arg name="velocity_max" value="20" />
+    <arg name="radius_min" value="6" />
+    <arg name="velocity_min" value="4" />
+    <arg name="accel_limit" value="0.5" />
+    <arg name="decel_limit" value="0.3" />
+    <arg name="lateral_accel_limit" value="2.0" />
+    <arg name="use_decision_maker" value="false" />
+  </include>
+
+  <!-- <node pkg="waypoint_maker" type="waypoint_marker_publisher" name="waypoint_marker_publisher" /> -->
+
+</launch>
