@@ -1,13 +1,14 @@
 <launch>
-
-  <arg name="odom_topic" default="/odometry/filtered" />
-  <arg name="steering_angle_topic" default="/current_steering_angle" />
+  <arg name="pose_topic" default="/ndt_pose" />
+  <arg name="twist_topic" default="/vehicle/twist" />
+  <arg name="steering_angle_topic" default="/vehicle/steering_angle" />
   <arg name="wheelbase" default="3.3" />
   <arg name="prediction_timestep" default="0.1" />
   <arg name="prediction_max_time" default="10.0" />
 
   <node name="trajectory_predictor_node" pkg="trajectory_predictor" type="trajectory_predictor_node" output="screen">
-    <param name="odom_topic" value="$(arg odom_topic)"/>
+    <param name="pose_topic" value="$(arg pose_topic)"/>
+    <param name="twist_topic" value="$(arg twist_topic)"/>
     <param name="steering_angle_topic" value="$(arg steering_angle_topic)/"/>
     <param name="wheelbase" value="$(arg wheelbase)"/>
     <param name="prediction_timestep" value="$(arg prediction_timestep)"/>

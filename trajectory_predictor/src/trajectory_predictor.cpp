@@ -1,6 +1,5 @@
-
 #include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -25,7 +24,7 @@ class TrajectoryPredictor {
   ros::Publisher prediction_pub;
 
   std::string pose_topic;
-  std::string odom_topic;
+  std::string twist_topic;
   std::string steering_angle_topic;
   std::string predicted_poses_topic;
 
@@ -36,10 +35,9 @@ class TrajectoryPredictor {
   double current_steering_angle;
   double current_velocity;
   geometry_msgs::Pose current_pose;
-  nav_msgs::Odometry current_odometry;
 
   void poseCallback(const geometry_msgs::PoseStamped pose_msg);
-  void odomCallback(const nav_msgs::Odometry odom_msg);
+  void twistCallback(const geometry_msgs::TwistStamped twist_msg);
   void steeringAngleCallback(const std_msgs::Float32 steering_angle_msg);
   void timerCallback(const ros::TimerEvent& timer_event);
 };
@@ -47,9 +45,9 @@ class TrajectoryPredictor {
 TrajectoryPredictor::TrajectoryPredictor() {
   ros::NodeHandle private_nh("~");
 
-  private_nh.param("pose_topic", pose_topic, std::string("/current_pose"));
-  private_nh.param("odom_topic", odom_topic, std::string("/odometry/filtered"));
-  private_nh.param("steering_angle_topic", steering_angle_topic, std::string("/current_steering_angle"));
+  private_nh.param("pose_topic", pose_topic, std::string("/ndt_pose"));
+  private_nh.param("twist_topic", twist_topic, std::string("/vehicle/twist"));
+  private_nh.param("steering_angle_topic", steering_angle_topic, std::string("/vehicle/steering_angle"));
   private_nh.param("predicted_poses_topic", predicted_poses_topic, std::string("/predicted_poses"));
 
   private_nh.param("prediction_timestep", prediction_timestep, 0.1);
@@ -60,7 +58,7 @@ TrajectoryPredictor::TrajectoryPredictor() {
   timer = nh.createTimer(ros::Duration(1.0 / 10.0), &TrajectoryPredictor::timerCallback, this);
 
   pose_sub = nh.subscribe(pose_topic, 1, &TrajectoryPredictor::poseCallback, this);
-  odom_sub = nh.subscribe(odom_topic, 1, &TrajectoryPredictor::odomCallback, this);
+  odom_sub = nh.subscribe(twist_topic, 1, &TrajectoryPredictor::twistCallback, this);
   steering_angle_sub = nh.subscribe(steering_angle_topic, 1, &TrajectoryPredictor::steeringAngleCallback, this);
 
   prediction_pub = nh.advertise<geometry_msgs::PoseArray>(predicted_poses_topic, 1);
@@ -91,8 +89,8 @@ void TrajectoryPredictor::poseCallback(const geometry_msgs::PoseStamped pose_msg
   current_pose = pose_msg.pose;
 }
 
-void TrajectoryPredictor::odomCallback(const nav_msgs::Odometry odom_msg) {
-  current_velocity = sqrt(pow(odom_msg.twist.twist.linear.x, 2) + pow(odom_msg.twist.twist.linear.y, 2));
+void TrajectoryPredictor::twistCallback(const geometry_msgs::TwistStamped twist_msg) {
+  current_velocity = twist_msg.twist.linear.x;
 }
 
 void TrajectoryPredictor::steeringAngleCallback(const std_msgs::Float32 steering_angle_msg) {

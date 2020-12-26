@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   tf2_geometry_msgs
   std_msgs
-  nav_msgs
   geometry_msgs
 )
 
