@@ -1,5 +1,4 @@
 #include <geometry_msgs/TransformStamped.h>
-#include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
@@ -30,19 +29,9 @@ class CarlaSensorPublisher {
 
   std::vector<std::pair<std::string, geometry_msgs::Transform>> sensor_id_transform_pairs;
 
-  ros::Subscriber odom_sub;
-  ros::Publisher odom_pub;
-
-  std::string odom_src_topic;
-  std::string odom_out_topic;
-  std::string odom_output_frame;
-  std::string odom_output_child_frame;
-
   double base_link_to_cog_x;
   double base_link_to_cog_y;
   double base_link_to_cog_z;
-
-  void odomCallback(const nav_msgs::Odometry in_odom_msg);
 
   void parseSensorDefinition();
 
@@ -65,16 +54,9 @@ CarlaSensorPublisher::CarlaSensorPublisher() {
   private_nh.param("base_link_to_cog_z", base_link_to_cog_z, 0.0);
 
   private_nh.param("sensor_ns", sensor_ns, std::string("sensors/"));
-  private_nh.param("odom_src_topic", odom_src_topic, std::string("/carla/ego_vehicle/odometry"));
-  private_nh.param("odom_out_topic", odom_out_topic, std::string("odometry"));
-  private_nh.param("odom_output_frame", odom_output_frame, std::string("odom"));
-  private_nh.param("odom_output_child_frame", odom_output_child_frame, std::string("base_link"));
 
   parseSensorDefinition();
   publishTransforms();
-
-  odom_sub = nh.subscribe(odom_src_topic, 1, &CarlaSensorPublisher::odomCallback, this);
-  odom_pub = nh.advertise<nav_msgs::Odometry>(sensor_ns + odom_out_topic, 1);
 }
 
 template <typename S, typename T>
@@ -92,15 +74,6 @@ void CarlaSensorPublisher::initPubSub(std::string in_topic, std::string out_topi
 
   ros::Publisher pub = nh.advertise<T>(out_topic, 1);
   publishers.push_back(pub);
-}
-
-void CarlaSensorPublisher::odomCallback(const nav_msgs::Odometry in_odom_msg) {
-  nav_msgs::Odometry out_odom_msg;
-  out_odom_msg = in_odom_msg;
-  out_odom_msg.header.frame_id = odom_output_frame;
-  out_odom_msg.child_frame_id = odom_output_child_frame;
-
-  odom_pub.publish(out_odom_msg);
 }
 
 void CarlaSensorPublisher::parseSensorDefinition() {
