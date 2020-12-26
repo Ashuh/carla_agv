@@ -1,0 +1,15 @@
+<launch>
+  <arg name="twist_topic" default="/vehicle/twist" />
+  <arg name="steering_angle_topic" default="/vehicle/steering_angle" />
+  <arg name="carla_vehicle_status_topic" default="/carla/ego_vehicle/vehicle_status" />
+  <arg name="vehicle_pose_topic" default="/ndt_pose" />
+  <arg name="max_steering_angle" default="1.03" />
+
+  <node name="carla_vehicle_state_publisher_node" pkg="carla_vehicle_state_publisher" type="carla_vehicle_state_publisher_node" output="screen">
+    <param name="twist_topic" value="$(arg twist_topic)"/>
+    <param name="steering_angle_topic" value="$(arg steering_angle_topic)"/>
+    <param name="carla_vehicle_status_topic" value="$(arg carla_vehicle_status_topic)"/>
+    <param name="vehicle_pose_topic" value="$(arg vehicle_pose_topic)/"/>
+    <param name="max_steering_angle" value="$(arg max_steering_angle)"/>
+  </node>
+</launch>
